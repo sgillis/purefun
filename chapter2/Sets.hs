@@ -1,0 +1,26 @@
+{-# LANGUAGE MultiParamTypeClasses,
+             FlexibleInstances      #-}
+
+module Set (Set(..)) where
+
+class Set s a where
+    empty   :: s a
+    insert  :: a -> s a -> s a
+    member  :: a -> s a -> Bool
+
+data UnbalancedSet a = E | T (UnbalancedSet a) a (UnbalancedSet a) deriving Show
+
+instance Ord a => Set UnbalancedSet a where
+    empty = E
+
+    member x E = False
+    member x (T a y b)
+        | x < y     = member x a
+        | x > y     = member x b
+        | otherwise = True
+
+    insert x E = T E x E
+    insert x s@(T a y b)
+        | x < y     = T (insert x a) y b
+        | x > y     = T a y (insert x b)
+        | otherwise = s
